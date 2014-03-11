@@ -257,7 +257,7 @@ describe GdsApi::Router do
           with(:body => {"route" => route_data}.to_json).
           to_return(:status => 201, :body => route_data.to_json, :headers => {"Content-type" => "application/json"})
 
-        response = @api.add_redirect_route("/foo", "exact", "/bar", "temporary")
+        response = @api.add_redirect_route("/foo", "exact", "/bar", :redirect_type => "temporary")
         assert_equal 201, response.code
         assert_equal "/bar", response.redirect_to
 
@@ -269,7 +269,7 @@ describe GdsApi::Router do
         req = WebMock.stub_request(:put, "#{@base_api_url}/routes").
           to_return(:status => 201, :body =>{}.to_json, :headers => {"Content-type" => "application/json"})
 
-        @api.add_redirect_route("/foo", "exact", "/bar", "temporary", :skip_commit => true)
+        @api.add_redirect_route("/foo", "exact", "/bar", :redirect_type => "temporary", :skip_commit => true)
 
         assert_requested(req)
         assert_not_requested(@commit_req)

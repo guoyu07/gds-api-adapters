@@ -26,6 +26,7 @@ class MiniTest::Unit::TestCase
   end
 end
 
+require 'pact/consumer/minitest'
 module PactTest
   include Pact::Consumer::Minitest
 

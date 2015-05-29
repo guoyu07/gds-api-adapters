@@ -40,6 +40,27 @@ describe GdsApi::ContentRegister do
       assert_equal 201, response.code
     end
 
+    it "responds with unprocessable entry if the content id is not valid" do
+      content_register.given("an empty content register")
+        .upon_receiving("an entry with an invalid content id")
+        .with(
+          method: :put,
+          path: "/entry/invalid-content-id",
+          body: entry
+        )
+        .will_respond_with(
+          status: 422,
+          body: entry.merge(content_id: 'invalid-content-id')
+        )
+
+      begin
+        @api_adapter.put_entry('invalid-content-id', entry)
+        fail "expected to raise"
+      rescue => e
+        assert_instance_of GdsApi::HTTPClientError, e
+      end
+    end
+
     it "responds with 200 OK if the entry does exist" do
       content_register.given("an entry exists at /entry/#{content_id}")
         .upon_receiving("PUT new entry")

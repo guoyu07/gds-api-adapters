@@ -17,18 +17,19 @@ Gem::Specification.new do |s|
   s.files        = Dir.glob("lib/**/*") + %w(README.md Rakefile)
   s.test_files   = Dir['test/**/*']
   s.require_path = 'lib'
-  s.add_dependency 'plek'
-  s.add_dependency 'null_logger'
   s.add_dependency 'link_header'
   s.add_dependency 'lrucache', '~> 0.1.1'
-  s.add_dependency 'rest-client', '~> 1.8.0'
+  s.add_dependency 'null_logger'
+  s.add_dependency 'plek'
   s.add_dependency 'rack-cache'
+  s.add_dependency 'rest-client', '~> 1.8.0'
 
+  s.add_development_dependency "minitest", "> 5.0.0"
   s.add_development_dependency 'gem_publisher', '~> 1.5.0'
   s.add_development_dependency 'mocha', "> 1.0.0"
-  s.add_development_dependency "minitest", "> 5.0.0"
   s.add_development_dependency 'pact'
   s.add_development_dependency 'pact-consumer-minitest'
+  s.add_development_dependency 'pact_broker-client', '~> 1.0.0'
   s.add_development_dependency 'pry'
   s.add_development_dependency 'rack'
   s.add_development_dependency 'rack-test'
@@ -38,5 +39,4 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'simplecov-rcov'
   s.add_development_dependency 'timecop', '~> 0.5.1'
   s.add_development_dependency 'webmock', '~> 1.19'
-  s.add_development_dependency 'pact_broker-client', '~> 1.0.0'
 end

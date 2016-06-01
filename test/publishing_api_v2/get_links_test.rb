@@ -3,7 +3,7 @@ require 'gds_api/publishing_api_v2'
 require 'json'
 
 describe GdsApi::PublishingApiV2 do
-  include PactTest
+  include Pact::Consumer::Minitest
 
   before do
     @api_client = GdsApi::PublishingApiV2.new('http://localhost:3093')

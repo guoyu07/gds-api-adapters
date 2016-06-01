@@ -3,7 +3,7 @@ require 'gds_api/publishing_api_v2'
 require 'json'
 
 describe GdsApi::PublishingApiV2 do
-  include PactTest
+  include Pact::Consumer::Minitest
 
   def content_item_for_content_id(content_id, attrs = {})
     {

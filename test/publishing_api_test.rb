@@ -4,7 +4,7 @@ require 'gds_api/test_helpers/publishing_api'
 
 describe GdsApi::PublishingApi do
   include GdsApi::TestHelpers::PublishingApi
-  include PactTest
+  include Pact::Consumer::Minitest
 
   before do
     @base_api_url = Plek.current.find("publishing-api")

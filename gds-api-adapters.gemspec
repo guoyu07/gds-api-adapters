@@ -41,8 +41,8 @@ Gem::Specification.new do |s|
   # webmock is released.
   s.add_development_dependency 'webmock', '2.0.3'
 
-  s.add_development_dependency 'pact', '1.9.0'
-  s.add_development_dependency 'pact-mock_service', '0.8.1'
+  s.add_development_dependency 'pact', '1.9.2'
+  s.add_development_dependency 'pact-mock_service', '0.9.0'
   s.add_development_dependency 'pact-consumer-minitest', '1.0.1'
-  s.add_development_dependency 'pact_broker-client', '1.0.0'
+  s.add_development_dependency 'pact_broker-client', '1.0.1'
 end

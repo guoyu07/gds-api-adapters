@@ -11,7 +11,7 @@ node {
     }
 
     stage("Build") {
-      dir "gds-api-adapters" {
+      dir("gds-api-adapters") {
       withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'pact-broker-ci-dev',
         usernameVariable: 'PACT_BROKER_USERNAME', passwordVariable: 'PACT_BROKER_PASSWORD']]) {
         def pact_branch = (env.BRANCH_NAME == 'master' ? 'master' : "branch-${env.BRANCH_NAME}")
@@ -38,7 +38,7 @@ node {
     }
 
     stage("Run publishing-api pact") {
-      dir "publishing-api" {
+      dir("publishing-api") {
         runRakeTask("pact:verify:branch[${GDS_API_BRANCH}]")
         withEnv(["JOB_NAME=publishing-api"]) { // TODO: This environment is a hack
           bundleApp()
@@ -47,7 +47,7 @@ node {
     }
 
     if (env.BRANCH_NAME == 'master') {
-      dir "gds-api-adapters" {
+      dir("gds-api-adapters") {
       stage("Push release tag") {
         echo 'Pushing tag'
         govuk.pushTag(REPOSITORY, env.BRANCH_NAME, 'release_' + env.BUILD_NUMBER)

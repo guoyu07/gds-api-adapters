@@ -7,7 +7,7 @@ node {
 
   try {
     stage("Checkout gds-api-adapters") {
-      echo "branch ${env.BRANCH}"
+      echo "Checkout gds-api-adapters branch: ${env.BRANCH_NAME}"
       checkout([
         changelog: false,
         poll: false,
@@ -22,7 +22,7 @@ node {
             ],
             [
               $class: 'LocalBranch',
-              localBranch: env.BRANCH,
+              localBranch: env.BRANCH_NAME,
             ]
           ],
           submoduleCfg: [],
@@ -65,7 +65,7 @@ node {
           ]
         ]) {
           withEnv([
-            "PACT_TARGET_BRANCH=branch-${env.BRANCH}",
+            "PACT_TARGET_BRANCH=branch-${env.BRANCH_NAME}",
             "PACT_BROKER_BASE_URL=https://pact-broker.dev.publishing.service.gov.uk"
           ]) {
             govuk.runRakeTask("pact:publish:branch")
@@ -117,7 +117,7 @@ node {
             passwordVariable: 'PACT_BROKER_PASSWORD'
           ]
         ]) {
-          govuk.runRakeTask("pact:verify:branch[${env.BRANCH}]")
+          govuk.runRakeTask("pact:verify:branch[${env.BRANCH_NAME}]")
         }
       }
     }

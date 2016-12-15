@@ -10,8 +10,6 @@ node {
       checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'gds-api-adapters']], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'github-token-govuk-ci-username', name: 'gds-api-adapters', url: 'https://github.com/alphagov/gds-api-adapters.git']]]
     }
 
-    def pact_branch = (env.BRANCH_NAME == 'master' ? 'master' : "branch-${env.BRANCH_NAME}")
-
     stage("Build") {
       dir("gds-api-adapters") {
 
@@ -33,13 +31,13 @@ node {
     stage("Publish pact") {
       dir("gds-api-adapters") {
                 withCredentials([[
-                            $class: 'UsernamePasswordMultiBinding',
+                                    $class: 'UsernamePasswordMultiBinding',
                           credentialsId: 'pact-broker-ci-dev',
                           usernameVariable: 'PACT_BROKER_USERNAME',
                           passwordVariable: 'PACT_BROKER_PASSWORD'
                                   ]]) {
                   withEnv([
-                            "PACT_TARGET_BRANCH=${pact_branch}",
+                            "PACT_TARGET_BRANCH=branch-${env.BRANCH}",
                             "PACT_BROKER_BASE_URL=https://pact-broker.dev.publishing.service.gov.uk"
                        ]) {
                     govuk.runRakeTask("pact:publish:branch")
@@ -63,7 +61,7 @@ node {
                           usernameVariable: 'PACT_BROKER_USERNAME',
                           passwordVariable: 'PACT_BROKER_PASSWORD'
         ]]) {
-          govuk.runRakeTask("pact:verify:branch[${pact_branch}]")
+          govuk.runRakeTask("pact:verify:branch[${env.BRANCH}]")
         }
       }
     }

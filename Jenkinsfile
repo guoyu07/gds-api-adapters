@@ -31,7 +31,7 @@ node {
       ])
     }
 
-    if (branch == 'master') {
+    if (env.BRANCH_NAME == 'master') {
       stage("Push release tag") {
         echo 'Pushing tag'
         govuk.pushTag(REPOSITORY, env.BRANCH_NAME, 'release_' + env.BUILD_NUMBER)

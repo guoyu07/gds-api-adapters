@@ -7,47 +7,96 @@ node {
 
   try {
     stage("Checkout gds-api-adapters") {
-      checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'gds-api-adapters']], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'github-token-govuk-ci-username', name: 'gds-api-adapters', url: 'https://github.com/alphagov/gds-api-adapters.git']]]
+      checkout([
+        changelog: false,
+        poll: false,
+        scm: [
+          $class: 'GitSCM',
+          branches: [[name: '*/master']],
+          doGenerateSubmoduleConfigurations: false,
+          extensions: [
+            [
+              $class: 'RelativeTargetDirectory',
+              relativeTargetDir: 'gds-api-adapters'
+            ]
+          ],
+          submoduleCfg: [],
+          userRemoteConfigs: [
+            [
+              credentialsId: 'github-token-govuk-ci-username',
+              name: 'gds-api-adapters',
+              url: 'https://github.com/alphagov/gds-api-adapters.git'
+            ]
+          ]
+        ]
+      ])
     }
 
     stage("Build") {
       dir("gds-api-adapters") {
+        sshagent(['govuk-ci-ssh-key']) {
+          sh "${WORKSPACE}/jenkins.sh"
+        }
 
-          sshagent(['govuk-ci-ssh-key']) {
-            sh "${WORKSPACE}/jenkins.sh"
-          }
-
-          publishHTML(target: [
-                        allowMissing: false,
-                               alwaysLinkToLastBuild: false,
-                               keepAll: true,
-                               reportDir: 'coverage/rcov',
-                               reportFiles: 'index.html',
-                               reportName: 'RCov Report'
-                      ])
+        publishHTML(target: [
+          allowMissing: false,
+          alwaysLinkToLastBuild: false,
+          keepAll: true,
+          reportDir: 'coverage/rcov',
+          reportFiles: 'index.html',
+          reportName: 'RCov Report'
+        ])
       }
     }
 
     stage("Publish pact") {
       dir("gds-api-adapters") {
-                withCredentials([[
-                                    $class: 'UsernamePasswordMultiBinding',
-                          credentialsId: 'pact-broker-ci-dev',
-                          usernameVariable: 'PACT_BROKER_USERNAME',
-                          passwordVariable: 'PACT_BROKER_PASSWORD'
-                                  ]]) {
-                  withEnv([
-                            "PACT_TARGET_BRANCH=branch-${env.BRANCH}",
-                            "PACT_BROKER_BASE_URL=https://pact-broker.dev.publishing.service.gov.uk"
-                       ]) {
-                    govuk.runRakeTask("pact:publish:branch")
-                  }
-                }
+        withCredentials([
+          [
+            $class: 'UsernamePasswordMultiBinding',
+            credentialsId: 'pact-broker-ci-dev',
+            usernameVariable: 'PACT_BROKER_USERNAME',
+            passwordVariable: 'PACT_BROKER_PASSWORD'
+          ]
+        ]) {
+          withEnv([
+            "PACT_TARGET_BRANCH=branch-${env.BRANCH}",
+            "PACT_BROKER_BASE_URL=https://pact-broker.dev.publishing.service.gov.uk"
+          ]) {
+            govuk.runRakeTask("pact:publish:branch")
+          }
+        }
       }
     }
 
     stage("Checkout publishing-api") {
-      checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'publishing-api']], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'github-token-govuk-ci-username', name: 'publishing-api', url: 'https://github.com/alphagov/publishing-api.git']]]
+      checkout([
+        changelog: false,
+        poll: false,
+        scm: [
+          $class: 'GitSCM',
+          branches: [
+            [
+              name: '*/master'
+            ]
+          ],
+          doGenerateSubmoduleConfigurations: false,
+          extensions: [
+            [
+              $class: 'RelativeTargetDirectory',
+             relativeTargetDir: 'publishing-api'
+            ]
+          ],
+          submoduleCfg: [],
+          userRemoteConfigs: [
+            [
+              credentialsId: 'github-token-govuk-ci-username',
+             name: 'publishing-api',
+             url: 'https://github.com/alphagov/publishing-api.git'
+            ]
+          ]
+        ]
+      ])
     }
 
     stage("Run publishing-api pact") {
@@ -55,12 +104,14 @@ node {
         withEnv(["JOB_NAME=publishing-api"]) { // TODO: This environment is a hack
           govuk.bundleApp()
         }
-        withCredentials([[
-                            $class: 'UsernamePasswordMultiBinding',
-                          credentialsId: 'pact-broker-ci-dev',
-                          usernameVariable: 'PACT_BROKER_USERNAME',
-                          passwordVariable: 'PACT_BROKER_PASSWORD'
-        ]]) {
+        withCredentials([
+          [
+            $class: 'UsernamePasswordMultiBinding',
+            credentialsId: 'pact-broker-ci-dev',
+            usernameVariable: 'PACT_BROKER_USERNAME',
+            passwordVariable: 'PACT_BROKER_PASSWORD'
+          ]
+        ]) {
           govuk.runRakeTask("pact:verify:branch[${env.BRANCH}]")
         }
       }
@@ -68,16 +119,16 @@ node {
 
     if (env.BRANCH_NAME == 'master') {
       dir("gds-api-adapters") {
-      stage("Push release tag") {
-        echo 'Pushing tag'
-        govuk.pushTag(REPOSITORY, env.BRANCH_NAME, 'release_' + env.BUILD_NUMBER)
-      }
+        stage("Push release tag") {
+          echo 'Pushing tag'
+          govuk.pushTag(REPOSITORY, env.BRANCH_NAME, 'release_' + env.BUILD_NUMBER)
+        }
 
-      stage("Publish gem") {
-        echo 'Publishing gem'
-        bundleApp()
-        sh("bundle exec rake publish_gem --trace")
-      }
+        stage("Publish gem") {
+          echo 'Publishing gem'
+          bundleApp()
+          sh("bundle exec rake publish_gem --trace")
+        }
       }
     }
   } catch (e) {

@@ -35,7 +35,7 @@ node {
     stage("Build") {
       dir("gds-api-adapters") {
         sshagent(['govuk-ci-ssh-key']) {
-          sh "${WORKSPACE}/jenkins.sh"
+          sh "./jenkins.sh"
         }
 
         publishHTML(target: [

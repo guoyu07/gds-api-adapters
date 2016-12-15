@@ -37,8 +37,10 @@ node {
                           credentialsId: 'pact-broker-ci-dev',
                           usernameVariable: 'PACT_BROKER_USERNAME',
                           passwordVariable: 'PACT_BROKER_PASSWORD'
-        ]]) {
-          govuk.runRakeTask("pact:publish:branch")
+                                  ]]) {
+                  withEnv(["PACT_TARGET_BRANCH=${pact_branch}"]) {
+                    govuk.runRakeTask("pact:publish:branch")
+                  }
                 }
       }
     }

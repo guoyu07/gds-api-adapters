@@ -38,7 +38,10 @@ node {
                           usernameVariable: 'PACT_BROKER_USERNAME',
                           passwordVariable: 'PACT_BROKER_PASSWORD'
                                   ]]) {
-                  withEnv(["PACT_TARGET_BRANCH=${pact_branch}"]) {
+                  withEnv([
+                            "PACT_TARGET_BRANCH=${pact_branch}",
+                            "PACT_BROKER_BASE_URL=https://pact-broker.dev.publishing.service.gov.uk"
+                       ]) {
                     govuk.runRakeTask("pact:publish:branch")
                   }
                 }

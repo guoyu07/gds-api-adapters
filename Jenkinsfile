@@ -10,11 +10,12 @@ node {
       checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'gds-api-adapters']], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'github-token-govuk-ci-username', name: 'gds-api-adapters', url: 'https://github.com/alphagov/gds-api-adapters.git']]]
     }
 
+    def pact_branch = (env.BRANCH_NAME == 'master' ? 'master' : "branch-${env.BRANCH_NAME}")
+
     stage("Build") {
       dir("gds-api-adapters") {
       withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'pact-broker-ci-dev',
         usernameVariable: 'PACT_BROKER_USERNAME', passwordVariable: 'PACT_BROKER_PASSWORD']]) {
-        def pact_branch = (env.BRANCH_NAME == 'master' ? 'master' : "branch-${env.BRANCH_NAME}")
         withEnv(["PACT_TARGET_BRANCH=${pact_branch}"]) {
           sshagent(['govuk-ci-ssh-key']) {
             sh "${WORKSPACE}/jenkins.sh"
@@ -39,7 +40,7 @@ node {
 
     stage("Run publishing-api pact") {
       dir("publishing-api") {
-        runRakeTask("pact:verify:branch[${GDS_API_BRANCH}]")
+        runRakeTask("pact:verify:branch[${pact_branch}]")
         withEnv(["JOB_NAME=publishing-api"]) { // TODO: This environment is a hack
           bundleApp()
         }

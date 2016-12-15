@@ -7,6 +7,7 @@ node {
 
   try {
     stage("Checkout gds-api-adapters") {
+      echo "branch ${env.BRANCH}"
       checkout([
         changelog: false,
         poll: false,

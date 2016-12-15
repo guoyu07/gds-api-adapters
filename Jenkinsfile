@@ -34,9 +34,9 @@ node {
 
     stage("Build") {
       dir("gds-api-adapters") {
-        sshagent(['govuk-ci-ssh-key']) {
+        //sshagent(['govuk-ci-ssh-key']) {
           sh "./jenkins.sh"
-        }
+          //}
 
         publishHTML(target: [
           allowMissing: false,
@@ -84,15 +84,15 @@ node {
           extensions: [
             [
               $class: 'RelativeTargetDirectory',
-             relativeTargetDir: 'publishing-api'
+              relativeTargetDir: 'publishing-api'
             ]
           ],
           submoduleCfg: [],
           userRemoteConfigs: [
             [
               credentialsId: 'github-token-govuk-ci-username',
-             name: 'publishing-api',
-             url: 'https://github.com/alphagov/publishing-api.git'
+              name: 'publishing-api',
+              url: 'https://github.com/alphagov/publishing-api.git'
             ]
           ]
         ]

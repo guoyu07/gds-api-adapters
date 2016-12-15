@@ -40,10 +40,10 @@ node {
 
     stage("Run publishing-api pact") {
       dir("publishing-api") {
-        govuk.runRakeTask("pact:verify:branch[${pact_branch}]")
         withEnv(["JOB_NAME=publishing-api"]) { // TODO: This environment is a hack
           govuk.bundleApp()
         }
+        govuk.runRakeTask("pact:verify:branch[${pact_branch}]")
       }
     }
 

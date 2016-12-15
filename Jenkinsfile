@@ -14,23 +14,32 @@ node {
 
     stage("Build") {
       dir("gds-api-adapters") {
-      withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'pact-broker-ci-dev',
-        usernameVariable: 'PACT_BROKER_USERNAME', passwordVariable: 'PACT_BROKER_PASSWORD']]) {
-        withEnv(["PACT_TARGET_BRANCH=${pact_branch}"]) {
+
           sshagent(['govuk-ci-ssh-key']) {
             sh "${WORKSPACE}/jenkins.sh"
           }
-        }
-      }
 
-      publishHTML(target: [
-        allowMissing: false,
-        alwaysLinkToLastBuild: false,
-        keepAll: true,
-        reportDir: 'coverage/rcov',
-        reportFiles: 'index.html',
-        reportName: 'RCov Report'
-      ])
+          publishHTML(target: [
+                        allowMissing: false,
+                               alwaysLinkToLastBuild: false,
+                               keepAll: true,
+                               reportDir: 'coverage/rcov',
+                               reportFiles: 'index.html',
+                               reportName: 'RCov Report'
+                      ])
+      }
+    }
+
+    stage("Publish pact") {
+      dir("gds-api-adapters") {
+                withCredentials([[
+                            $class: 'UsernamePasswordMultiBinding',
+                          credentialsId: 'pact-broker-ci-dev',
+                          usernameVariable: 'PACT_BROKER_USERNAME',
+                          passwordVariable: 'PACT_BROKER_PASSWORD'
+        ]]) {
+          govuk.runRakeTask("pact:publish:branch")
+                }
       }
     }
 
@@ -43,7 +52,14 @@ node {
         withEnv(["JOB_NAME=publishing-api"]) { // TODO: This environment is a hack
           govuk.bundleApp()
         }
-        govuk.runRakeTask("pact:verify:branch[${pact_branch}]")
+        withCredentials([[
+                            $class: 'UsernamePasswordMultiBinding',
+                          credentialsId: 'pact-broker-ci-dev',
+                          usernameVariable: 'PACT_BROKER_USERNAME',
+                          passwordVariable: 'PACT_BROKER_PASSWORD'
+        ]]) {
+          govuk.runRakeTask("pact:verify:branch[${pact_branch}]")
+        }
       }
     }
 

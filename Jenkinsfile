@@ -18,6 +18,10 @@ node {
             [
               $class: 'RelativeTargetDirectory',
               relativeTargetDir: 'gds-api-adapters'
+            ],
+            [
+              $class: 'LocalBranch',
+              localBranch: env.BRANCH,
             ]
           ],
           submoduleCfg: [],

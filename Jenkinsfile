@@ -14,9 +14,7 @@ node {
       withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'pact-broker-ci-dev',
         usernameVariable: 'PACT_BROKER_USERNAME', passwordVariable: 'PACT_BROKER_PASSWORD']]) {
         def pact_branch = (env.BRANCH_NAME == 'master' ? 'master' : "branch-${env.BRANCH_NAME}")
-        def publish_gem = (env.BRANCH_NAME == 'master' ? '1' : '')
-
-        withEnv(["PACT_TARGET_BRANCH=${pact_branch}", "PUBLISH_GEM=${publish_gem}"]) {
+        withEnv(["PACT_TARGET_BRANCH=${pact_branch}"]) {
           sshagent(['govuk-ci-ssh-key']) {
             sh "${WORKSPACE}/jenkins.sh"
           }
@@ -33,9 +31,17 @@ node {
       ])
     }
 
-    stage("Push release tag") {
-      echo 'Pushing tag'
-      govuk.pushTag(REPOSITORY, env.BRANCH_NAME, 'release_' + env.BUILD_NUMBER)
+    if (branch == 'master') {
+      stage("Push release tag") {
+        echo 'Pushing tag'
+        govuk.pushTag(REPOSITORY, env.BRANCH_NAME, 'release_' + env.BUILD_NUMBER)
+      }
+
+      stage("Publish gem") {
+        echo 'Publishing gem'
+        bundleApp()
+        sh("bundle exec rake publish_gem --trace")
+      }
     }
   } catch (e) {
     currentBuild.result = "FAILED"

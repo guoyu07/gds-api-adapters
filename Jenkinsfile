@@ -20,10 +20,6 @@ node {
               $class: 'RelativeTargetDirectory',
               relativeTargetDir: 'gds-api-adapters'
             ],
-            [
-              $class: 'LocalBranch',
-              localBranch: env.BRANCH_NAME,
-            ]
           ],
           submoduleCfg: [],
           userRemoteConfigs: [
@@ -39,9 +35,9 @@ node {
 
     stage("Build") {
       dir("gds-api-adapters") {
-        //sshagent(['govuk-ci-ssh-key']) {
-          sh "${WORKSPACE}/gds-api-adapters/jenkins.sh"
-          //}
+        // TODO: I gave up trying to get Jenkins to do this
+        sh "git checkout ${env.BRANCH_NAME}"
+        sh "${WORKSPACE}/gds-api-adapters/jenkins.sh"
 
         publishHTML(target: [
           allowMissing: false,

@@ -48,8 +48,4 @@ class GdsApi::NeedApi < GdsApi::Base
     # NB: This should really be a POST
     delete_json_with_params!("#{endpoint}/needs/#{CGI.escape(need_id.to_s)}/closed", author)
   end
-
-  def create_note(note)
-    post_json("#{endpoint}/notes", note)
-  end
 end

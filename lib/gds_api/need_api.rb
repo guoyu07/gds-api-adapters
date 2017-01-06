@@ -31,10 +31,6 @@ class GdsApi::NeedApi < GdsApi::Base
     put_json("#{endpoint}/needs/#{CGI.escape(need_id.to_s)}", need_update)
   end
 
-  def organisations
-    get_json("#{endpoint}/organisations")["organisations"]
-  end
-
   def close(need_id, duplicate_of)
     # duplicate_of is a hash of the required fields for closing
     # a need as a duplicate: { "duplicate_of" => 100001,

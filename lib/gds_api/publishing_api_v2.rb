@@ -110,7 +110,7 @@ class GdsApi::PublishingApiV2 < GdsApi::Base
   # @see https://github.com/alphagov/publishing-api/blob/master/doc/api.md#post-v2contentcontent_idpublish
   def import(content_id, content_items)
     params = {
-      content_items: content_items,
+      history: content_items,
     }
 
     post_json("#{endpoint}/v2/content/#{content_id}/import", params)

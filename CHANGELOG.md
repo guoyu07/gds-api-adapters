@@ -1,3 +1,19 @@
+# 39.1.0
+
+* Pass through GOVUK_FACT_CHECK_ID header. This will be added by
+  authenticating-proxy when a draft item is requested with a valid JWT token;
+  the value itself will be checked by content-store against the value stored
+  in the content item.
+
+# 39.0.0
+
+* Remove the `need_api_has_organisations` test helper.
+
+# 38.1.0
+
+* Handle URI::InvalidURIError exceptions with GdsApi::InvalidUrl
+* Removed tests for the deprecated `format` field in the Publishing API.
+
 # 38.0.0
 
 * Added an adapter for the import endpoint of the Need API.

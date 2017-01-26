@@ -11,7 +11,8 @@ describe GdsApi::PublishingApiV2 do
       "content_id" => content_id,
       "title" => "Instructions for crawler robots",
       "description" => "robots.txt provides rules for which parts of GOV.UK are permitted to be crawled by different bots.",
-      "format" => "special_route",
+      "schema_name" => "special_route",
+      "document_type" => "special_route",
       "public_updated_at" => "2015-07-30T13:58:11.000Z",
       "publishing_app" => "static",
       "rendering_app" => "static",
@@ -122,7 +123,9 @@ describe GdsApi::PublishingApiV2 do
             status: 422,
             body: [
               {
+                schema: Pact.like({}),
                 fragment: "#/base_path",
+                message: Pact.like("The property '#/base_path' value \"not a url path\" did not match the regex '^/(([a-zA-Z0-9._~!$&'()*+,;=:@-]|%[0-9a-fA-F]{2})+(/([a-zA-Z0-9._~!$&'()*+,;=:@-]|%[0-9a-fA-F]{2})*)*)?$' in schema 729a13d6-8ddb-5ba8-b116-3b7604dc3d3d#"),
                 failed_attribute: "Pattern"
               }
             ],
@@ -149,7 +152,6 @@ describe GdsApi::PublishingApiV2 do
             "details" => { "body" => [] },
             "previous_version" => "3"
           )
-          @content_item.delete("format")
 
           publishing_api
             .given("the content item #{@content_id} is at version 3")
@@ -182,7 +184,6 @@ describe GdsApi::PublishingApiV2 do
             "details" => { "body" => [] },
             "previous_version" => "2"
           )
-          @content_item.delete("format")
 
           publishing_api
             .given("the content item #{@content_id} is at version 3")
@@ -260,7 +261,7 @@ describe GdsApi::PublishingApiV2 do
       it "responds with 200 and the content item" do
         response = @api_client.get_content(@content_id)
         assert_equal 200, response.code
-        assert_equal @content_item["format"], response["document_type"]
+        assert_equal @content_item["document_type"], response["document_type"]
       end
     end
 
@@ -737,61 +738,6 @@ describe GdsApi::PublishingApiV2 do
     end
   end
 
-  describe "#import" do
-    describe "if the import command succeeds" do
-      let(:content_id) { SecureRandom.uuid }
-      let(:content_item) {
-        content_item_for_content_id(content_id,
-          state: "superseded"
-        )
-      }
-
-      let(:content_items) {
-        [
-          {
-            action: "PutContent",
-            payload: content_item,
-          },
-          {
-            action: "PutContent",
-            payload: content_item.merge(
-              state: "draft",
-              base_path: "/foo", routes: [{ path: "/foo", type: "exact" }],
-            ),
-          },
-          {
-            action: "Publish",
-            payload: content_item.merge(state: "published", update_type: "major"),
-          },
-        ]
-      }
-
-      before do
-        publishing_api
-          .given("no content exists")
-          .upon_receiving("an import request")
-          .with(
-            method: :post,
-            path: "/v2/content/#{content_id}/import",
-            body: {
-              content_items: content_items,
-            },
-            headers: GdsApi::JsonClient.default_request_with_json_body_headers.merge(
-              "Authorization" => "Bearer #{@bearer_token}"
-            ),
-          )
-          .will_respond_with(
-            status: 200
-          )
-      end
-
-      it "responds with 200 if the publish command succeeds" do
-        response = @api_client.import(content_id, content_items)
-        assert_equal 200, response.code
-      end
-    end
-  end
-
   describe "#unpublish" do
     describe "if the unpublish command succeeds" do
       before do
@@ -1254,7 +1200,7 @@ describe GdsApi::PublishingApiV2 do
 
     it "returns the content items of a given document_type" do
       publishing_api
-        .given("there is content with format 'topic'")
+        .given("there is content with document_type 'topic'")
         .upon_receiving("a get linkables request")
         .with(
           method: :get,
@@ -1272,18 +1218,13 @@ describe GdsApi::PublishingApiV2 do
       response = @api_client.get_linkables(document_type: "topic")
       assert_equal 200, response.code
       assert_equal linkables, response.to_a
-
-      # `format` is supported but deprecated for backwards compatibility
-      response = @api_client.get_linkables(format: "topic")
-      assert_equal 200, response.code
-      assert_equal linkables, response.to_a
     end
   end
 
   describe "#get_content_items" do
-    it "returns the content items of a certain format" do
+    it "returns the content items of a certain document_type" do
       publishing_api
-        .given("there is content with format 'topic'")
+        .given("there is content with document_type 'topic'")
         .upon_receiving("a get entries request")
         .with(
           method: :get,

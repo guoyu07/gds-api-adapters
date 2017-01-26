@@ -108,12 +108,12 @@ class GdsApi::PublishingApiV2 < GdsApi::Base
   # @param content_items [Array]
   #
   # @see https://github.com/alphagov/publishing-api/blob/master/doc/api.md#post-v2contentcontent_idpublish
-  def import(content_id, content_items)
+  def import(content_id, locale, content_items)
     params = {
       history: content_items,
     }
 
-    post_json("#{endpoint}/v2/content/#{content_id}/import", params)
+    post_json("#{endpoint}/v2/content/#{content_id}/import?locale=#{locale}", params)
   end
 
   # Unpublish a content item
